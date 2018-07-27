@@ -5,8 +5,8 @@ function DragAndDropTemplates(configuration) {
     var ngettext;
     var colsPerSlide = 4;
     var rowsPerSlide = 2;
-    var rectangle_item_character_limit = 70;
-    var square_item_character_limit = 180;
+    var rectangle_item_character_limit = 50;
+    var square_item_character_limit = 120;
 
     if ('DragAndDropI18N' in window) {
         // Use DnDv2's local translations
@@ -151,7 +151,9 @@ function DragAndDropTemplates(configuration) {
         var read_more_button;
         className += getItemShapeClass(item_content_html);
         if (item_content_html.length > square_item_character_limit) {
-            read_more_button = h('button.show-item-detail-popup', { innerHTML: gettext("Read All")});
+            read_more_button = h('button.show-item-detail-popup', { innerHTML: gettext("Read All")}, [
+                h('span.fa.fa-arrows-alt')
+            ]);
         }
         var attributes = {
             'role': 'button',
@@ -890,6 +892,10 @@ function DragAndDropTemplates(configuration) {
                             }),
                             renderCollection(zoneTemplate, ctx.zones, ctx)
                         ]),
+                    ]),
+                    h('div.item-detail-popup', [
+                        h('a.close-item-detail-popup.fa.fa-times'),
+                        h('p.item-detail-popup-content.simplebar#myElement')
                     ]),
                     h('div.item-bank', item_bank_properties, bank_children),
                     ctx.show_feedback_bar ? itemFeedbackPopupTemplate(ctx) : null,
