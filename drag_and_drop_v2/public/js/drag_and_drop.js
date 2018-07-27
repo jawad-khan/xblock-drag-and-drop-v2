@@ -4,9 +4,10 @@ function DragAndDropTemplates(configuration) {
     var gettext;
     var ngettext;
     var colsPerSlide = 4;
-    var rowsPerSlide = 2;
     var rectangle_item_character_limit = 50;
     var square_item_character_limit = 120;
+    var rectanglesPerCol = 2;
+    var squaresPerCol = 1;
 
     if ('DragAndDropI18N' in window) {
         // Use DnDv2's local translations
@@ -46,23 +47,62 @@ function DragAndDropTemplates(configuration) {
         });
     };
 
-    var divideDragablesInToRows = function(dragables, itemsOrder) {
-        var dividedDragables = [];
+    var orderDragables = function(dragables, itemsOrder) {
         var orderedDragables = [];
+        // order dragables according to their original order
         for (var i=0; i<itemsOrder.length; i++)
         {
             orderedDragables[itemsOrder[i]] = dragables[i];
         }
+        return orderedDragables;
+    };
+
+    var divideDragablesInToSlides = function(dragables) {
+        var dividedDragables = separateSquareAndRectangles(dragables);
+        var rectanglesCount = dividedDragables.rectangles.length;
+        var slides = [];
         var i = 0;
-        while (i < orderedDragables.length) {
-            var rows = [];
-            for (var j = 0; j < rowsPerSlide; j=j+1) {
-                rows[j] = h("div.row", orderedDragables.slice(i, i+colsPerSlide));
-                i += colsPerSlide;
+        while (i < dragables.length) {
+            var cols = [];
+            for (var j = 0; j < colsPerSlide && i < dragables.length; j=j+1) {
+                if (i < rectanglesCount)
+                {
+                    var lastIndex = i + rectanglesPerCol;
+                    var isOverflow = lastIndex > rectanglesCount;
+                    var rectanglesThisCol = isOverflow? rectanglesPerCol - (lastIndex%rectanglesCount): rectanglesPerCol;
+                    cols[j] = h("div.col", dividedDragables.rectangles.slice(i, i+rectanglesThisCol));
+                    i += rectanglesThisCol;
+                }
+                else
+                {
+                    cols[j] = h("div.col", dividedDragables.squares.slice(i-rectanglesCount, i+squaresPerCol-rectanglesCount));
+                    i += squaresPerCol;
+                }
             }
-            dividedDragables.push(h("div.slide", rows));
+            slides.push(h("div.slide", cols));
         }
-        return dividedDragables;
+        return slides;
+    };
+
+    var separateSquareAndRectangles = function(dragables) {
+        var squareTiles = [];
+        var rectangleTiles = [];
+        dragables.forEach(function(dragable){
+            var className = dragable.properties.className;
+            if (className.match('square'))
+            {
+                squareTiles.push(dragable);
+            }
+            else
+            {
+                rectangleTiles.push(dragable);
+            }
+        });
+
+        return {
+            'squares': squareTiles,
+            'rectangles': rectangleTiles
+        };
     };
 
     var getZone = function(zoneUID, ctx) {
@@ -73,12 +113,13 @@ function DragAndDropTemplates(configuration) {
         }
     };
 
-    var getItemShapeClass = function(item_content_html) {
-        if (item_content_html.length < rectangle_item_character_limit) {
-            return " rectangle-option";
+    var getItemShapeClass = function(item) {
+        var item_content_html = gettext(item.displayName);
+        if (item.has_image || item_content_html.length > rectangle_item_character_limit) {
+            return " square-option";
         }
-        return " square-option";
-    }
+        return " rectangle-option";
+    };
 
     var bankItemWidthStyles = function(item, ctx) {
         var style = {};
@@ -130,7 +171,7 @@ function DragAndDropTemplates(configuration) {
         }
         var item_content_html = gettext(item.displayName);
         var read_more_button;
-        className += getItemShapeClass(item_content_html);
+        className += getItemShapeClass(item);
         if (item_content_html.length > square_item_character_limit) {
             read_more_button = h('button.show-item-detail-popup', { innerHTML: gettext("Read All")}, [
                 h('span.fa.fa-arrows-alt')
@@ -249,9 +290,8 @@ function DragAndDropTemplates(configuration) {
             className += " specified-width";  // The author has specified a width for this item.
         }
         var item_content_html = gettext(item.displayName);
-        className += getItemShapeClass(item_content_html);
+        className += getItemShapeClass(item);
         var style = bankItemWidthStyles(item, ctx);
-        // todo V4 remove this line after styling
         var attributes = {
             'draggable': false,
             'data-value': item.value
@@ -720,7 +760,8 @@ function DragAndDropTemplates(configuration) {
         bank_children = bank_children.concat(renderCollection(itemPlaceholderTemplate, items_placed, ctx));
         var itemsOrder = inBankItemsOrder.concat(placedItemsOrder);
 
-        bank_children = divideDragablesInToRows(bank_children, itemsOrder);
+        var orderedDragables = orderDragables(bank_children, itemsOrder);
+        bank_children = divideDragablesInToSlides(orderedDragables);
         var drag_container_style = {};
         var target_img_style = {};
         // If drag_container_max_width is null, we are going to measure the container width after this render.
