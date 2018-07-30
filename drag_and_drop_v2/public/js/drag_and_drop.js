@@ -895,7 +895,7 @@ function DragAndDropTemplates(configuration) {
                     ]),
                     h('div.item-detail-popup', [
                         h('a.close-item-detail-popup.fa.fa-times'),
-                        h('p.item-detail-popup-content.simplebar#myElement')
+                        h('p.item-detail-popup-content')
                     ]),
                     h('div.item-bank', item_bank_properties, bank_children),
                     ctx.show_feedback_bar ? itemFeedbackPopupTemplate(ctx) : null,
@@ -1641,6 +1641,16 @@ function DragAndDropBlock(runtime, element, configuration) {
 
     var initDraggable = function() {
         var $container = $root.find('.drag-container');
+
+        // Apply custom scrollbar to draggable item detail popup
+        $container.find('.item-detail-popup-content').niceScroll({
+            cursorwidth: 5,
+            cursoropacitymin: 0.4,
+            cursorcolor: '#ffffff',
+            cursorborder: 'none',
+            cursorborderradius: 10,
+            autohidemode: 'leave'
+        });
 
         // Allow items to be "picked up" using the keyboard
         $container.on('keydown', '.option[draggable=true]', function(evt) {
