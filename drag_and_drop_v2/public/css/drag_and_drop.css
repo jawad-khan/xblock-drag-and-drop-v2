@@ -104,14 +104,20 @@
     padding: 0; /* padding: 5px looks better but makes some blocks to change in size when dropped onto the target; */
 }
 
+.xblock--drag-and-drop .drag-container .col {
+    width: 150px;
+    display: inline-block;
+    margin: 5px 5px 0;
+    vertical-align: top;
+}
+
 .xblock--drag-and-drop .drag-container .option {
     display: inline-block;
     min-width: 4em;
-    max-width: 30%;
     border: 1px solid transparent;
     border-radius: 2px;
     box-sizing: border-box;
-    margin: 5px 5px 0;
+    margin: 0 0 10px 0;
     padding: 10px;
     text-align: center;
     background-color: #1d5280;
@@ -230,7 +236,6 @@
 
 .item-bank .slide{
     padding: 10px 0;
-    text-align: center;
 }
 
 .bx-controls .bx-controls-direction > a{
