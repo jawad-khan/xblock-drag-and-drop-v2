@@ -1452,6 +1452,7 @@ function DragAndDropBlock(runtime, element, configuration) {
 
         applyState();
         submitLocation(item_id, zone);
+        $zone.addClass("green-zone");
     };
 
     var countItemsInZone = function(zone, exclude_ids) {
@@ -1907,6 +1908,7 @@ function DragAndDropBlock(runtime, element, configuration) {
     var closePopup = function(manually_closed) {
         // do not apply state here - callers are responsible to call it when other appropriate state changes are applied
         if ($root.find(Selector.popup_box).is(":visible")) {
+            $root.find(".zone").removeClass('green-zone')
             state.closing = true;
             previousFeedback = state.feedback;
             state.manually_closed = manually_closed;
