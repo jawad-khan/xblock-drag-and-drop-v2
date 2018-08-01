@@ -173,7 +173,7 @@
 .xblock--drag-and-drop .item-detail-popup p{
     margin: 0;
     font-size: 14px;
-    max-height: 180px;
+    max-height: 400px;
     overflow: auto;
 }
 .xblock--drag-and-drop .item-detail-popup:after{
@@ -225,6 +225,7 @@
     color: white;
     transform: translate(-50%, -50%);
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .xblock--drag-and-drop .drag-container .dropped {
