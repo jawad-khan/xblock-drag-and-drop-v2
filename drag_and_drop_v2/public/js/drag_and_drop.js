@@ -372,6 +372,28 @@ function DragAndDropTemplates(configuration) {
         );
     };
 
+    var assessmentNotificationTemplate = function (ctx) {
+        if (configuration.mode === DragAndDropBlock.STANDARD_MODE) {
+            return
+        }
+        var icon = h('div.class1');
+        var button = h('div.class3', h('button.close-assessment-notification', gettext("Continue")));
+
+        var attemptText = gettext("You can review answers / resubmit {max_attempts} times")
+            .replace("{max_attempts}", ctx.max_attempts);
+
+        var text = h('ol', [
+            h('li', gettext("Place all items in the correct zone")),
+            h('li', gettext("Press submit")),
+            h('li', gettext("See your results")),
+            h('p', [attemptText])]);
+
+        var content = h('div.class2', text);
+        var style = {display: "none"};
+        return h("div.assessment-notification", {style: style}, [icon, content, button]);
+
+    };
+
     var feedbackTemplate = function(ctx) {
         var messages = ctx.overall_feedback_messages || [];
         var feedback_display = messages.length > 0 ? 'block' : 'none';
@@ -809,6 +831,7 @@ function DragAndDropTemplates(configuration) {
                     (ctx.show_submit_answer ? submitAnswerTemplate(ctx) : null),
                     sidebarTemplate(ctx),
                 ]),
+                assessmentNotificationTemplate(ctx),
                 keyboardHelpPopupTemplate(ctx),
                 feedbackTemplate(ctx),
                 h('div.sr.reader-feedback-area', {
@@ -953,8 +976,12 @@ function DragAndDropBlock(runtime, element, configuration) {
 
             initDraggable();
             initDroppable();
-            pageLoaded = true
+            pageLoaded = true;
             initializeSlider();
+            if (configuration.mode === DragAndDropBlock.ASSESSMENT_MODE) {
+                showAssessmentNotification();
+            }
+
             // Indicate that problem is done loading
             publishEvent({event_type: 'edx.drag_and_drop_v2.loaded'});
         }).fail(function() {
@@ -1044,6 +1071,13 @@ function DragAndDropBlock(runtime, element, configuration) {
             itemSlider = undefined;
         }
 
+    };
+
+    var showAssessmentNotification = function() {
+        $root.find('.assessment-notification').show();
+        $root.find(".close-assessment-notification").click(function() {
+            $root.find('.assessment-notification').hide();
+        });
     };
 
     var runOnKey = function(evt, key, handler) {
