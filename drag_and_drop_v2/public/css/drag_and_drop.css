@@ -82,6 +82,7 @@
     padding: 1%;
     background-color: #ebf0f2;
     position: relative;
+    overflow: hidden;
 }
 
 /*** DRAGGABLE ITEMS ***/
@@ -891,6 +892,86 @@
     border-color: #d2d0d0;
     background: #f2f3f3;
     color: #676666
+}
+
+/*** Assessment window notification ***/
+
+.assessment-notification {
+    display: table;
+    width: 100%;
+    background-color: #1d5280;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    height: 200px;
+    color: #ffffff;
+    box-shadow: 0 -2px 10px #999;
+}
+
+.assessment-notification > div{
+    display: table-cell;
+    vertical-align: middle;
+    height: 200px;
+    text-align: center;
+}
+
+.assessment-notification > .icon{
+    width: 210px;
+}
+.assessment-notification > .icon .fa{
+    width: 52px;
+    height: 52px;
+    line-height: 52px;
+    background-color: #ffffff;
+    border-radius: 50%;
+}
+.assessment-notification > .icon .fa:before{
+    color: #000000;
+    font-size: 24px;
+}
+
+.assessment-notification > .instructions{
+    width: calc(100% - 210px - 180px);
+    text-align: left;
+    max-height: 200px;
+    overflow: auto;
+}
+.assessment-notification > .instructions ol{
+    padding-left: 20px;
+}
+.assessment-notification > .instructions ol li{
+    padding: 3px 0;
+    font-size: 14px;
+    font-weight: 400;
+}
+.assessment-notification > .instructions p{
+    font-style: italic;
+    font-size: 13px;
+}
+.assessment-notification > .action button{
+    font-size: 14px;
+    padding: 12px 14px;
+    text-align: left;
+    border: 1px solid #fff;
+    min-width: 135px;
+    background-color: transparent;
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+    color: #ffffff;
+}
+.assessment-notification > .action button:before{
+    content: "\f105";
+    font-family: 'FontAwesome';
+    position: absolute;
+    right: 8px;
+    font-size: 22px;
+    top: 8px;
+}
+
+.assessment-notification > .action{
+    width: 180px;
 }
 
 

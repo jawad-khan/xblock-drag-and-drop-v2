@@ -376,19 +376,21 @@ function DragAndDropTemplates(configuration) {
         if (configuration.mode === DragAndDropBlock.STANDARD_MODE) {
             return
         }
-        var icon = h('div.class1');
-        var button = h('div.class3', h('button.close-assessment-notification', gettext("Continue")));
+        var icon = h('div.icon' , h('i.fa.fa-exclamation'));
+        var button = h('div.action', h('button.close-assessment-notification', gettext("Continue")));
 
-        var attemptText = gettext("You can review answers / resubmit {max_attempts} times")
-            .replace("{max_attempts}", ctx.max_attempts);
+        var attemptText = h('p',
+            gettext(
+                "You can review answers / resubmit {max_attempts} times"
+            ).replace("{max_attempts}", ctx.max_attempts)
+        );
 
         var text = h('ol', [
             h('li', gettext("Place all items in the correct zone")),
             h('li', gettext("Press submit")),
-            h('li', gettext("See your results")),
-            h('p', [attemptText])]);
+            h('li', gettext("See your results"))]);
 
-        var content = h('div.class2', text);
+        var content = h('div.instructions', [text, attemptText]);
         var style = {display: "none"};
         return h("div.assessment-notification", {style: style}, [icon, content, button]);
 
@@ -826,12 +828,12 @@ function DragAndDropTemplates(configuration) {
                     h('div.item-bank', item_bank_properties, bank_children),
                     itemFeedbackPopupTemplate(ctx),
                     h('div.dragged-items', renderCollection(itemTemplate, items_dragged, ctx)),
+                    assessmentNotificationTemplate(ctx),
                 ]),
                 h("div.actions-toolbar", {attributes: {'role': 'group', 'aria-label': gettext('Actions')}}, [
                     (ctx.show_submit_answer ? submitAnswerTemplate(ctx) : null),
                     sidebarTemplate(ctx),
                 ]),
-                assessmentNotificationTemplate(ctx),
                 keyboardHelpPopupTemplate(ctx),
                 feedbackTemplate(ctx),
                 h('div.sr.reader-feedback-area', {
