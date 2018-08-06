@@ -947,27 +947,30 @@
 }
 .assessment-notification > .instructions p{
     font-style: italic;
-    font-size: 13px;
+    font-size: 14px;
 }
 .assessment-notification > .action button{
-    font-size: 14px;
-    padding: 12px 14px;
+    font-size: 12px;
+    padding: 17px 20px;
     text-align: left;
     border: 1px solid #fff;
-    min-width: 135px;
+    min-width: 125px;
     background-color: transparent;
     border-radius: 3px;
     position: relative;
     cursor: pointer;
     color: #ffffff;
+    line-height: 1;
+    font-weight: bold;
 }
 .assessment-notification > .action button:before{
     content: "\f105";
     font-family: 'FontAwesome';
     position: absolute;
-    right: 8px;
-    font-size: 22px;
-    top: 8px;
+    right: 16px;
+    font-size: 36px;
+    top: 5px;
+    font-weight: normal;
 }
 
 .assessment-notification > .action{
