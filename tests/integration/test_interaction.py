@@ -13,9 +13,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from xblockutils.resources import ResourceLoader
 
 from tests.integration.test_base import (
-    DefaultDataTestMixin, InteractionTestBase, ItemDefinition
+    DefaultDataTestMixin, InteractionTestBase, ItemDefinition, FreeSizingInteractionTestBase
 )
 from .test_base import BaseIntegrationTest
+from drag_and_drop_v2.utils import Constants
 
 # Globals ###########################################################
 
@@ -174,7 +175,6 @@ class ParameterizedTestsMixin(object):
     def parameterized_cannot_move_items_between_zones(self, items_map, all_zones, scroll_down=100, action_key=None):
         # Scroll drop zones into view to make sure Selenium can successfully drop items
         self.scroll_down(pixels=scroll_down)
-
         # Take each item an assigned zone, place it into the correct zone, then ensure it cannot be moved to other.
         # zones or back to the bank.
         for item_key, definition in items_map.items():
@@ -239,6 +239,7 @@ class ParameterizedTestsMixin(object):
         reset = self._get_reset_button()
         if action_key is not None:  # Using keyboard to interact with block
             reset.send_keys(Keys.RETURN)
+
         else:
             reset.click()
 
@@ -293,6 +294,8 @@ class StandardInteractionTest(DefaultDataTestMixin, InteractionTestBase, Paramet
     All interactions are tested using mouse (action_key=None) and four different keyboard action keys.
     If default data changes this will break.
     """
+    item_sizing = Constants.FIXED_SIZING
+
     @data(*ITEM_DRAG_KEYBOARD_KEYS)
     def test_item_positive_feedback_on_good_move(self, action_key):
         self.parameterized_item_positive_feedback_on_good_move_standard(self.items_map, action_key=action_key)
@@ -447,8 +450,14 @@ class StandardInteractionTest(DefaultDataTestMixin, InteractionTestBase, Paramet
                 self.close_feedback_popup()
 
 
+@ddt
+class FreeSizingStandardInteractionTest(StandardInteractionTest, FreeSizingInteractionTestBase):
+    item_sizing = Constants.FREE_SIZING
+
+
 class MultipleValidOptionsInteractionTest(DefaultDataTestMixin, InteractionTestBase, BaseIntegrationTest):
 
+    item_sizing = Constants.FIXED_SIZING
     items_map = {
         0: ItemDefinition(
             0,
@@ -473,11 +482,16 @@ class MultipleValidOptionsInteractionTest(DefaultDataTestMixin, InteractionTestB
                 self.wait_until_html_in(item.feedback_positive[i], feedback_popup_content)
                 self.assert_popup_correct(popup)
                 self.assert_placed_item(item.item_id, item.zone_title[i])
+                self._scroll_to_reset_button()
                 reset.click()
                 self.wait_until_disabled(reset)
 
     def _get_scenario_xml(self):
         return self._get_custom_scenario_xml("data/test_multiple_options_data.json")
+
+
+class FreeSizingMultipleValidOptionsInteractionTest(MultipleValidOptionsInteractionTest, FreeSizingInteractionTestBase):
+    item_sizing = Constants.FREE_SIZING
 
 
 class PreventSpaceBarScrollTest(DefaultDataTestMixin, InteractionTestBase, BaseIntegrationTest):
@@ -533,6 +547,10 @@ class CustomDataInteractionTest(StandardInteractionTest):
         return self._get_custom_scenario_xml("data/test_data.json")
 
 
+class FreeSizingCustomDataInteractionTest(CustomDataInteractionTest, FreeSizingInteractionTestBase):
+    item_sizing = Constants.FREE_SIZING
+
+
 class CustomHtmlDataInteractionTest(StandardInteractionTest):
     items_map = {
         0: ItemDefinition(0, "Item 0", "", ['zone-1'], 'Zone <i>1</i>', "Yes <b>1</b>", "No <b>1</b>"),
@@ -549,6 +567,10 @@ class CustomHtmlDataInteractionTest(StandardInteractionTest):
 
     def _get_scenario_xml(self):
         return self._get_custom_scenario_xml("data/test_html_data.json")
+
+
+class FreeSizingCustomHtmlDataInteractionTest(CustomHtmlDataInteractionTest, FreeSizingInteractionTestBase):
+    item_sizing = Constants.FREE_SIZING
 
 
 class MultipleBlocksDataInteraction(ParameterizedTestsMixin, InteractionTestBase, BaseIntegrationTest):
@@ -580,10 +602,12 @@ class MultipleBlocksDataInteraction(ParameterizedTestsMixin, InteractionTestBase
         'block1': {"intro": "Some Intro Feed", "final": "Some Final Feed"},
         'block2': {"intro": "Other Intro Feed", "final": "Other Final Feed"},
     }
+    item_sizing = Constants.FIXED_SIZING
 
     def _get_scenario_xml(self):
         blocks_xml = "\n".join([
-            "<drag-and-drop-v2 data='{data}'/>".format(data=loader.load_unicode(filename))
+            "<drag-and-drop-v2 item_sizing='{item_sizing}' data='{data}'/>".format(data=loader.load_unicode(filename),
+                                                                                   item_sizing=self.item_sizing)
             for filename in (self.BLOCK1_DATA_FILE, self.BLOCK2_DATA_FILE)
         ])
 
@@ -627,6 +651,10 @@ class MultipleBlocksDataInteraction(ParameterizedTestsMixin, InteractionTestBase
         self.interact_with_keyboard_help(scroll_down=0, use_keyboard=True)
 
 
+class FreeSizingMultipleBlocksDataInteraction(MultipleBlocksDataInteraction, FreeSizingInteractionTestBase):
+    item_sizing = Constants.FREE_SIZING
+
+
 @ddt
 class ZoneAlignInteractionTest(InteractionTestBase, BaseIntegrationTest):
     """
@@ -635,6 +663,7 @@ class ZoneAlignInteractionTest(InteractionTestBase, BaseIntegrationTest):
     PAGE_TITLE = 'Drag and Drop v2'
     PAGE_ID = 'drag_and_drop_v2'
     ACTION_KEYS = ITEM_DRAG_KEYBOARD_KEYS
+    item_sizing = Constants.FIXED_SIZING
 
     def setUp(self):
         super(ZoneAlignInteractionTest, self).setUp()
@@ -691,6 +720,11 @@ class ZoneAlignInteractionTest(InteractionTestBase, BaseIntegrationTest):
                 self.wait_until_disabled(reset)
 
 
+@ddt
+class FreeSizingZoneAlignInteractionTest(ZoneAlignInteractionTest, FreeSizingInteractionTestBase):
+    item_sizing = Constants.FREE_SIZING
+
+
 class TestMaxItemsPerZone(InteractionTestBase, BaseIntegrationTest):
     """
     Tests for max items per dropzone feature
@@ -699,6 +733,7 @@ class TestMaxItemsPerZone(InteractionTestBase, BaseIntegrationTest):
     PAGE_ID = 'drag_and_drop_v2'
 
     assessment_mode = False
+    item_sizing = Constants.FIXED_SIZING
 
     def _get_scenario_xml(self):
         scenario_data = loader.load_unicode("data/test_zone_align.json")
@@ -761,6 +796,7 @@ class DragScrollingTest(InteractionTestBase, BaseIntegrationTest):
 
     PAGE_TITLE = 'Drag and Drop v2'
     PAGE_ID = 'drag_and_drop_v2'
+    item_sizing = Constants.FIXED_SIZING
 
     def setUp(self):
         super(DragScrollingTest, self).setUp()

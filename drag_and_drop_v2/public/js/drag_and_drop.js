@@ -47,7 +47,7 @@ function DragAndDropTemplates(configuration) {
         });
     };
 
-    var orderDragables = function(dragables, itemsOrder) {
+    var orderDragables = function(dragables, itemsOrder){
         var orderedDragables = [];
         // order dragables according to their original order
         for (var i=0; i<itemsOrder.length; i++)
@@ -123,7 +123,7 @@ function DragAndDropTemplates(configuration) {
 
     var bankItemWidthStyles = function(item, ctx) {
         var style = {};
-        if (item.widthPercent) {
+        if (item.widthPercent && configuration.item_sizing == DragAndDropBlock.FREE_SIZING) {
             // The item bank container is often wider than the background image, and the
             // widthPercent is specified relative to the background image so we have to
             // convert it to pixels. But if the browser window is not as wide as the image,
@@ -163,7 +163,7 @@ function DragAndDropTemplates(configuration) {
         if (item.has_image) {
             className += " " + "option-with-image";
         }
-        if (item.widthPercent) {
+        if (item.widthPercent && configuration.item_sizing == DragAndDropBlock.FREE_SIZING) {
             className += " specified-width";  // The author has specified a width for this item.
         }
         if (item.grabbed_with) {
@@ -201,15 +201,16 @@ function DragAndDropTemplates(configuration) {
             style.top = item.drag_position.top + 'px';
         }
         if (item.is_placed) {
-            var maxWidth = (item.widthPercent || 30) / 100;
+            var maxWidth = DragAndDropBlock.FREE_SIZING == configuration.item_sizing ? item.widthPercent || 30 : 30;
+            maxWidth = maxWidth / 100;
             var widthPercent = zone.width_percent / 100;
             style.maxWidth = ((1 / (widthPercent / maxWidth)) * 100) + '%';
-            if (item.widthPercent) {
+            if (item.widthPercent && configuration.item_sizing == DragAndDropBlock.FREE_SIZING) {
                 style.width = style.maxWidth;
             }
             // Finally, if the item is using automatic sizing and contains an image, we
             // always prefer the natural width of the image (subject to the max-width):
-            if (item.imgNaturalWidth && !item.widthPercent) {
+            if (item.imgNaturalWidth && !item.widthPercent && configuration.item_sizing == DragAndDropBlock.FREE_SIZING) {
                 style.width = (item.imgNaturalWidth + 22) + "px"; // 22px is for 10px padding + 1px border each side
                 // ^ Hack to detect image width at runtime and make webkit consistent with Firefox
             }
@@ -286,7 +287,7 @@ function DragAndDropTemplates(configuration) {
         if (item.has_image) {
             className += " " + "option-with-image";
         }
-        if (item.widthPercent) {
+        if (item.widthPercent && configuration.item_sizing == DragAndDropBlock.FREE_SIZING) {
             className += " specified-width";  // The author has specified a width for this item.
         }
         var item_content_html = gettext(item.displayName);
@@ -451,7 +452,7 @@ function DragAndDropTemplates(configuration) {
         );
     };
 
-    var submitAnswerTemplate = function(ctx) {
+    var actionButtonsTemplate = function(ctx) {
         var submitButtonProperties = {
             disabled: ctx.disable_submit_button || ctx.submit_spinner,
             attributes: {}
@@ -461,10 +462,10 @@ function DragAndDropTemplates(configuration) {
         if (ctx.max_attempts && ctx.max_attempts > 0) {
             var attemptsUsedId = "attempts-used-" + configuration.url_name;
             submitButtonProperties.attributes["aria-describedby"] = attemptsUsedId;
-            var attemptsUsedTemplate = gettext("You have used {used} of {total} attempts.");
+            var attemptsUsedTemplate = gettext("{used} / {total}");
             var attemptsUsedText = attemptsUsedTemplate.
                 replace("{used}", ctx.attempts).replace("{total}", ctx.max_attempts);
-            attemptsUsedInfo = h("span.attempts-used", {id: attemptsUsedId}, attemptsUsedText);
+            attemptsUsedInfo = h("div.attempts-used", {id: attemptsUsedId}, [h("span",attemptsUsedText), h('span.text', "Attempts")]);
         }
 
         var submitSpinner = null;
@@ -474,20 +475,25 @@ function DragAndDropTemplates(configuration) {
                 h('span.sr', gettext('Submitting'))
             ]);
         }
+        var submitButton = null;
+        if(ctx.show_submit_answer) {
+            submitButton = h(
+                "button.btn-brand.submit-answer-button",
+                submitButtonProperties,
+                [
+                    submitSpinner,
+                    ' ',  // whitespace between spinner icon and text
+                    gettext("Submit")
+                ]
+            )
+        }
 
         return (
-            h("div.action-toolbar-item.submit-answer", {}, [
-                h(
-                    "button.btn-brand.submit-answer-button",
-                    submitButtonProperties,
-                    [
-                        submitSpinner,
-                        ' ',  // whitespace between spinner icon and text
-                        gettext("Submit")
-                    ]
-                ),
-                attemptsUsedInfo
-            ])
+            [
+                attemptsUsedInfo,
+                submitButton,
+                sidebarTemplate(ctx)
+            ]
         );
     };
 
@@ -534,16 +540,16 @@ function DragAndDropTemplates(configuration) {
         return(
             h("div.action-toolbar-item.sidebar-buttons", {}, [
                 sidebarButtonTemplate(
-                    go_to_beginning_button_class,
-                    "fa-arrow-up",
-                    gettext("Go to Beginning"),
-                    {disabled: ctx.disable_go_to_beginning_button}
-                ),
-                sidebarButtonTemplate(
                     "reset-button",
-                    "fa-refresh",
+                    "",
                     gettext('Reset'),
                     {disabled: ctx.disable_reset_button}
+                ),
+                sidebarButtonTemplate(
+                    go_to_beginning_button_class,
+                    "",
+                    gettext("Go to Beginning"),
+                    {disabled: ctx.disable_go_to_beginning_button}
                 ),
                 showAnswerButton,
             ])
@@ -627,7 +633,7 @@ function DragAndDropTemplates(configuration) {
                         h(
                             'span.text',
                             {
-                                innerHTML: ctx.last_action_correct ? gettext("Select Another Tile") : gettext("Try Again"),
+                                innerHTML: ctx.last_action_correct ? gettext("Select Another Item") : gettext("Try Again"),
                                 attributes: {
                                     'aria-hidden': true
                                 }
@@ -784,8 +790,11 @@ function DragAndDropTemplates(configuration) {
         bank_children = bank_children.concat(renderCollection(itemPlaceholderTemplate, items_placed, ctx));
         var itemsOrder = inBankItemsOrder.concat(placedItemsOrder);
 
-        var orderedDragables = orderDragables(bank_children, itemsOrder);
-        bank_children = divideDragablesInToSlides(orderedDragables);
+        bank_children = orderDragables(bank_children, itemsOrder);
+        if (configuration.item_sizing == DragAndDropBlock.FIXED_SIZING)
+        {
+            bank_children = divideDragablesInToSlides(bank_children);
+        }
         var drag_container_style = {};
         var target_img_style = {};
         // If drag_container_max_width is null, we are going to measure the container width after this render.
@@ -830,10 +839,8 @@ function DragAndDropTemplates(configuration) {
                     h('div.dragged-items', renderCollection(itemTemplate, items_dragged, ctx)),
                     assessmentNotificationTemplate(ctx),
                 ]),
-                h("div.actions-toolbar", {attributes: {'role': 'group', 'aria-label': gettext('Actions')}}, [
-                    (ctx.show_submit_answer ? submitAnswerTemplate(ctx) : null),
-                    sidebarTemplate(ctx),
-                ]),
+                h("div.actions-toolbar", { attributes: {'role': 'group', 'aria-label': gettext('Actions')}}, 
+                actionButtonsTemplate(ctx)),
                 keyboardHelpPopupTemplate(ctx),
                 feedbackTemplate(ctx),
                 h('div.sr.reader-feedback-area', {
@@ -852,6 +859,9 @@ function DragAndDropBlock(runtime, element, configuration) {
 
     DragAndDropBlock.STANDARD_MODE = 'standard';
     DragAndDropBlock.ASSESSMENT_MODE = 'assessment';
+    DragAndDropBlock.FIXED_SIZING = "fixed_sizing";
+    DragAndDropBlock.FREE_SIZING = "free_sizing";
+
 
     var Selector = {
         popup_box: '.popup',
@@ -978,10 +988,10 @@ function DragAndDropBlock(runtime, element, configuration) {
 
             initDraggable();
             initDroppable();
-            pageLoaded = true;
-            initializeSlider();
-            if (configuration.mode === DragAndDropBlock.ASSESSMENT_MODE) {
-                showAssessmentNotification();
+            if (configuration.item_sizing == DragAndDropBlock.FIXED_SIZING)
+            {
+                pageLoaded = true;
+                initializeSlider();
             }
 
             // Indicate that problem is done loading
@@ -2120,7 +2130,7 @@ function DragAndDropBlock(runtime, element, configuration) {
             problem_html: configuration.problem_text,
             show_problem_header: configuration.show_problem_header,
             show_submit_answer: configuration.mode == DragAndDropBlock.ASSESSMENT_MODE,
-            show_show_answer: configuration.mode == DragAndDropBlock.ASSESSMENT_MODE,
+            show_show_answer: configuration.mode == false,
             target_img_src: configuration.target_img_expanded_url,
             target_img_description: configuration.target_img_description,
             display_zone_labels: configuration.display_zone_labels,

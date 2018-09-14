@@ -111,6 +111,11 @@
     margin: 5px 5px 0;
     vertical-align: top;
 }
+.xblock--drag-and-drop .drag-container .bx-wrapper .option {
+    width: 150px;
+    height: 55px;
+
+}
 
 .xblock--drag-and-drop .drag-container .option {
     display: inline-block;
@@ -237,6 +242,7 @@
 
 .item-bank .slide{
     padding: 10px 0;
+    text-align: center;
 }
 
 .bx-controls .bx-controls-direction > a{
@@ -629,6 +635,9 @@
     margin: 0;
     top: 50%;
     transform: translateY(-50%);
+    overflow: auto;
+    max-height: 128px;
+    padding: 10px 0;
 }
 
 .xblock--drag-and-drop .popup .popup-content img {
@@ -662,7 +671,8 @@
     position: absolute;
     right: 8px;
     font-size: 22px;
-    top: 8px;
+    top: 6px;
+    font-family: 'FontAwesome';
 }
 
 .xblock--drag-and-drop .popup .close-feedback-popup-mobile-button {
@@ -981,9 +991,13 @@
 /*** ACTIONS TOOLBAR ***/
 
 .xblock--drag-and-drop .actions-toolbar {
-    min-height: 3.75em;
-    width: auto;
     position: relative;
+    background-color: #1d5280;
+    margin-top: 0;
+    height: 62px;
+    padding: 9px 20px;
+    box-sizing: border-box;
+
 }
 
 .xblock--drag-and-drop .actions-toolbar .action-toolbar-item {
@@ -991,9 +1005,54 @@
     margin: 10px 0;
 }
 
+.xblock--drag-and-drop .actions-toolbar .submit-answer-button{
+    border: 0;
+    color: #ffffff;
+}
+
+.xblock--drag-and-drop .actions-toolbar .submit-answer-button[disabled]{
+    background-color: #566a85;
+    color: #8094af;
+}
+
+.xblock--drag-and-drop .actions-toolbar button{
+    min-height: 44px;
+    cursor: pointer;
+}
+
+.xblock--drag-and-drop .actions-toolbar .sidebar-button-wrapper,
+.xblock--drag-and-drop .actions-toolbar button,
+.xblock--drag-and-drop .actions-toolbar .sidebar-buttons{
+    float: right;
+}
+
+.xblock--drag-and-drop .actions-toolbar .sidebar-button-wrapper button[disabled]{
+    background-color: #566a85;
+    color: #8094af;
+}
+.xblock--drag-and-drop .actions-toolbar .sidebar-button-wrapper button{
+    margin-right: 10px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+    background-color: #ffffff;
+    padding: 0.625em 1.625em;
+    font-size: 16px;
+}
+
 .xblock--drag-and-drop .attempts-used {
-    font-size: 0.875em;
-    color: #666;
+    font-size: 1.125em;
+    display: inline-block;
+    color: #ffffff;
+    margin-top: 4px;
+    margin-left: 50px;
+    text-align: center;
+}
+
+.xblock--drag-and-drop .attempts-used .text{
+    display: block;
+    font-size: .75em;
+    margin-top: 2px;
+    color: #8094af;
 }
 
 .ltr .xblock--drag-and-drop .attempts-used {
@@ -1035,7 +1094,6 @@
 
 .xblock--drag-and-drop .sidebar-buttons .sidebar-button-wrapper {
     border-collapse: collapse;
-    padding: 0 5px;
     display: inline-block;
     height: 100%;
 }

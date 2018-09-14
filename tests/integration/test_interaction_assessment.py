@@ -36,11 +36,13 @@ class DefaultAssessmentDataTestMixin(DefaultDataTestMixin):
     Provides a test scenario with default options in assessment mode.
     """
     MAX_ATTEMPTS = 5
+    item_sizing = Constants.FREE_SIZING
 
     def _get_scenario_xml(self):  # pylint: disable=no-self-use
         return """
-            <vertical_demo><drag-and-drop-v2 mode='{mode}' max_attempts='{max_attempts}'/></vertical_demo>
-        """.format(mode=Constants.ASSESSMENT_MODE, max_attempts=self.MAX_ATTEMPTS)
+            <vertical_demo><drag-and-drop-v2 mode='{mode}'
+             item_sizing='{item_sizing}' max_attempts='{max_attempts}'/></vertical_demo>
+        """.format(mode=Constants.ASSESSMENT_MODE, max_attempts=self.MAX_ATTEMPTS, item_sizing=self.item_sizing)
 
 
 class AssessmentTestMixin(object):
@@ -79,6 +81,9 @@ class AssessmentInteractionTest(
     All interactions are tested using mouse (action_key=None) and four different keyboard action keys.
     If default data changes this will break.
     """
+
+    item_sizing = Constants.FIXED_SIZING
+
     @data(*ITEM_DRAG_KEYBOARD_KEYS)
     def test_item_no_feedback_on_good_move(self, action_key):
         self.parameterized_item_positive_feedback_on_good_move_assessment(self.items_map, action_key=action_key)
@@ -113,7 +118,7 @@ class AssessmentInteractionTest(
         self.assertEqual(submit_button.get_attribute('disabled'), 'true')  # no items are placed
 
         attempts_info = self._get_attempts_info()
-        expected_text = "You have used {num} of {max} attempts.".format(num=0, max=self.MAX_ATTEMPTS)
+        expected_text = "{num} / {max}\nAttempts".format(num=0, max=self.MAX_ATTEMPTS)
         self.assertEqual(attempts_info.text, expected_text)
         self.assertEqual(attempts_info.is_displayed(), self.MAX_ATTEMPTS > 0)
 
@@ -182,7 +187,7 @@ class AssessmentInteractionTest(
         attempts_info = self._get_attempts_info()
 
         for index in xrange(self.MAX_ATTEMPTS):
-            expected_text = "You have used {num} of {max} attempts.".format(num=index, max=self.MAX_ATTEMPTS)
+            expected_text = "{num} / {max}\nAttempts".format(num=index, max=self.MAX_ATTEMPTS)
             self.assertEqual(attempts_info.text, expected_text)  # precondition check
             self.assertEqual(submit_button.get_attribute('disabled'), None)
             self.assertEqual(reset_button.get_attribute('disabled'), None)
@@ -212,37 +217,6 @@ class AssessmentInteractionTest(
                 self.fail("Description element should not be present")
             except NoSuchElementException:
                 pass
-
-    def test_show_answer(self):
-        """
-        Test "Show Answer" button is shown in assessment mode, enabled when no
-        more attempts remaining, is disabled and displays correct answers when
-        clicked.
-        """
-        show_answer_button = self._get_show_answer_button()
-        self.assertTrue(show_answer_button.is_displayed())
-
-        self.place_item(0, TOP_ZONE_ID, Keys.RETURN)
-        for _ in xrange(self.MAX_ATTEMPTS-1):
-            self.assertEqual(show_answer_button.get_attribute('disabled'), 'true')
-            self.click_submit()
-
-        # Place an incorrect item on the final attempt.
-        self.place_item(1, TOP_ZONE_ID, Keys.RETURN)
-        self.click_submit()
-
-        # A feedback popup should open upon final submission.
-        popup = self._get_popup()
-        self.assertTrue(popup.is_displayed())
-
-        self.assertIsNone(show_answer_button.get_attribute('disabled'))
-        self.click_show_answer()
-
-        # The popup should be closed upon clicking Show Answer.
-        self.assertFalse(popup.is_displayed())
-
-        self.assertEqual(show_answer_button.get_attribute('disabled'), 'true')
-        self._assert_show_answer_item_placement()
 
     def test_do_attempt_feedback_is_updated(self):
         """
