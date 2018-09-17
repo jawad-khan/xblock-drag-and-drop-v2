@@ -108,22 +108,22 @@
 .xblock--drag-and-drop .drag-container .col {
     width: 150px;
     display: inline-block;
-    margin: 5px 5px 0;
     vertical-align: top;
 }
-.xblock--drag-and-drop .drag-container .bx-wrapper .option {
-    width: 150px;
-    height: 55px;
 
+.xblock--drag-and-drop .drag-container .bx-wrapper .option {
+    width: 96%;
+    height: 55px;
 }
 
 .xblock--drag-and-drop .drag-container .option {
+    width: auto;
     display: inline-block;
     min-width: 4em;
     border: 1px solid transparent;
     border-radius: 2px;
     box-sizing: border-box;
-    margin: 0 0 10px 0;
+    margin: 5px 10px 0 0;
     padding: 10px;
     text-align: center;
     background-color: #1d5280;
@@ -138,13 +138,11 @@
     position: relative;
 }
 
-.xblock--drag-and-drop .drag-container .rectangle-option {
-    width: 150px;
+.xblock--drag-and-drop .drag-container .bx-wrapper .rectangle-option {
     height: 55px;
 }
 
-.xblock--drag-and-drop .drag-container .square-option {
-    width: 150px;
+.xblock--drag-and-drop .drag-container .bx-wrapper .square-option {
     height: 120px;
 }
 
@@ -997,7 +995,7 @@
     height: 62px;
     padding: 9px 20px;
     box-sizing: border-box;
-
+    border-top: 1px solid #27649a;
 }
 
 .xblock--drag-and-drop .actions-toolbar .action-toolbar-item {

@@ -114,6 +114,8 @@ function DragAndDropTemplates(configuration) {
     };
 
     var getItemShapeClass = function(item) {
+        if (configuration.item_sizing == DragAndDropBlock.FREE_SIZING)
+            return "";
         var item_content_html = gettext(item.displayName);
         if (item.has_image || item_content_html.length > rectangle_item_character_limit) {
             return " square-option";
@@ -290,7 +292,7 @@ function DragAndDropTemplates(configuration) {
         if (item.widthPercent && configuration.item_sizing == DragAndDropBlock.FREE_SIZING) {
             className += " specified-width";  // The author has specified a width for this item.
         }
-        var item_content_html = gettext(item.displayName);
+
         className += getItemShapeClass(item);
         var style = bankItemWidthStyles(item, ctx);
         var attributes = {
@@ -992,6 +994,10 @@ function DragAndDropBlock(runtime, element, configuration) {
             {
                 pageLoaded = true;
                 initializeSlider();
+            }
+
+            if (configuration.mode === DragAndDropBlock.ASSESSMENT_MODE) {
+                showAssessmentNotification();
             }
 
             // Indicate that problem is done loading
